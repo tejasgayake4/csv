@@ -1,24 +1,34 @@
 import os
 import csv
 
-# Define the folder path (Change this to your target directory)
-folder_path = "/storage/emulated/0/Download"  # Example: Downloads folder
+# File paths (modify if needed)
+csv_file_path = "/sdcard/Download/files_to_delete.csv"
+file_directory = "/sdcard/Documents/"
 
-# Get list of files
-files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+print("📂 Starting file deletion process...\n")
 
-# Define the output CSV file path
-csv_filename = "/storage/emulated/0/Download/file_list.csv"
+# Read CSV and delete files
+try:
+    with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            filename = row[0].strip()
+            file_path = os.path.join(file_directory, filename)
 
-# Write to CSV with progress updates
-total_files = len(files)
+            print(f"🔍 Checking: {filename}")
 
-with open(csv_filename, mode="w", newline="") as file:
-    writer = csv.writer(file)
-    writer.writerow(["Filename"])  # Header
+            if os.path.exists(file_path):
+                print(f"🗑️ Deleting: {filename} ... ", end="")
+                try:
+                    os.remove(file_path)
+                    print("✅ Deleted successfully!")
+                except Exception as e:
+                    print(f"❌ Error deleting: {e}")
+            else:
+                print(f"⚠️ File not found: {filename}")
 
-    for index, f in enumerate(files, start=1):
-        writer.writerow([f])
-        print(f"Processed {index}/{total_files}: {f}")  # Real-time progress update
-
-print(f"\n✅ CSV file saved at: {csv_filename}")
+    print("\n✅ Process completed!")
+except FileNotFoundError:
+    print("❌ CSV file not found!")
+except Exception as e:
+    print(f"⚠️ Error reading CSV file: {e}")
